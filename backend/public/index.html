@@ -7,91 +7,132 @@
 <meta name="apple-mobile-web-app-title" content="Bubble Tea">
 <title>Bubble Tea Chinese Menu</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;min-height:100vh}
-  #app{max-width:460px;margin:0 auto;padding:1.5rem 1rem 2rem;min-height:100vh}
-  h1{font-size:22px;font-weight:600;color:#1a1a1a}
-  /* ── Auth ── */
-  .auth-wrap{display:flex;flex-direction:column;align-items:center;padding-top:3rem}
-  .auth-logo{font-size:60px;margin-bottom:1rem}
-  .auth-title{font-size:24px;font-weight:700;margin-bottom:4px}
-  .auth-sub{font-size:14px;color:#888;margin-bottom:2rem}
-  .auth-tabs{display:flex;background:#ebebeb;border-radius:10px;padding:3px;margin-bottom:1.5rem;width:100%;max-width:320px}
-  .auth-tab{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:#666;transition:background .15s,color .15s}
-  .auth-tab.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-  .auth-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
-  .auth-input{width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:12px;font-size:16px;outline:none;transition:border-color .15s;background:#fff}
-  .auth-input:focus{border-color:#58cc02}
-  .auth-error{font-size:13px;color:#e24b4a;text-align:center;min-height:18px}
-  /* ── Top bar ── */
-  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-  .py-toggle{background:#fff;border:1.5px solid #e0e0e0;border-radius:20px;padding:5px 13px;font-size:13px;font-weight:500;cursor:pointer;color:#555;display:inline-flex;align-items:center;gap:5px;transition:border-color .15s,background .15s}
-  .py-toggle.on{border-color:#58cc02;color:#2a6a00;background:#f0fae8}
-  .py-toggle:active{transform:scale(.96)}
-  .logout-btn{background:none;border:none;font-size:12px;color:#bbb;cursor:pointer;padding:4px 8px}
-  .logout-btn:hover{color:#888}
-  /* ── Stats ── */
-  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
-  .stat-card{background:#fff;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #e8e8e8}
-  .stat-icon{font-size:20px;margin-bottom:2px}
-  .stat-val{font-size:22px;font-weight:600;color:#1a1a1a;line-height:1.2}
-  .stat-label{font-size:11px;color:#888;margin-top:2px}
-  /* ── Progress bar ── */
-  .progress-bar-track{height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
-  .progress-bar-fill{height:100%;background:#58cc02;border-radius:4px;transition:width .5s}
-  /* ── Buttons ── */
-  .btn-green{width:100%;padding:16px;background:#58cc02;color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:600;cursor:pointer;transition:transform .1s,opacity .1s}
-  .btn-green:active{transform:scale(.98);opacity:.92}
-  .btn-green:disabled{background:#c0e8a0;cursor:default;transform:none;opacity:1}
-  /* ── Tier sections ── */
-  .tier-section{margin-top:1.5rem}
-  .tier-heading{font-size:12px;font-weight:600;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-  .tier-badge{font-size:10px;background:#ebebeb;color:#666;border-radius:20px;padding:2px 8px;font-weight:500}
-  .char-grid{display:flex;flex-wrap:wrap;gap:8px}
-  .char-chip{background:#f2f2f2;border:1px solid #e0e0e0;border-radius:10px;padding:10px 14px;text-align:center;min-width:64px;cursor:pointer;user-select:none;transition:border-color .15s}
-  .char-chip.mastered{background:#f0fae8;border-color:#58cc02}
-  .char-zh{font-size:20px;font-weight:600;color:#1a1a1a}
-  .char-py{font-size:10px;color:#58cc02;margin-top:1px;font-weight:500;transition:opacity .2s}
-  .char-en{font-size:10px;color:#888;margin-top:1px}
-  /* ── Lesson HUD ── */
-  .hud{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
-  .hud-bar{flex:1;height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
-  .hud-bar-fill{height:100%;background:#58cc02;border-radius:4px;transition:width .3s}
-  .lives{display:flex;gap:3px;font-size:15px}
-  .instr{font-size:14px;color:#888;margin-bottom:1rem}
-  /* ── Prompt box ── */
-  .prompt-box{background:#fff;border-radius:16px;padding:1.75rem 1.5rem;text-align:center;margin-bottom:1.5rem;border:1px solid #e8e8e8}
-  .prompt-zh{font-size:56px;font-weight:600;color:#1a1a1a;line-height:1.1;cursor:pointer;user-select:none;display:inline-block}
-  .prompt-py{font-size:17px;color:#888;margin-top:8px;transition:opacity .2s}
-  .prompt-en{font-size:26px;font-weight:600;color:#1a1a1a}
-  .speak-btn{background:#f2f2f2;border:1.5px solid #e0e0e0;border-radius:50px;padding:8px 18px;font-size:14px;cursor:pointer;margin-top:14px;display:inline-flex;align-items:center;gap:6px;color:#444;font-weight:500;transition:background .15s}
-  .speak-btn:active{background:#e4e4e4;transform:scale(.95)}
-  .speak-btn.playing{background:#e8f4fd;border-color:#7ec8f5;color:#1e6fa0}
-  /* ── Choices ── */
-  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .choice{background:#fff;border:1.5px solid #d0d0d0;border-radius:12px;padding:14px 10px 10px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;user-select:none}
-  .choice:active{transform:scale(.97)}
-  .choice.correct{background:#edfae8;border-color:#58cc02 !important;border-width:2px}
-  .choice.wrong{background:#fde8e8;border-color:#e24b4a !important;border-width:2px}
-  .choice-zh{font-size:26px;font-weight:600;color:#1a1a1a;line-height:1.2}
-  .choice-py{font-size:11px;color:#888;margin-top:3px;min-height:15px;transition:opacity .2s}
-  .choice-en{font-size:14px;color:#1a1a1a;line-height:1.4}
-  .choice-speak{position:absolute;top:5px;right:6px;font-size:12px;color:#ccc;background:none;border:none;cursor:pointer;padding:3px;line-height:1;border-radius:4px}
-  .choice-speak:active{color:#58cc02}
-  .q-counter{font-size:12px;color:#aaa;text-align:center;margin-top:1.25rem}
-  .py-hidden{opacity:0}
-  /* ── Tooltip ── */
-  #tt{position:fixed;background:#1a1a1a;color:#fff;border-radius:10px;padding:7px 15px;font-size:15px;font-weight:500;pointer-events:none;z-index:9999;transform:translateX(-50%);display:none;white-space:nowrap}
-  #tt::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:7px solid transparent;border-bottom:none;border-top-color:#1a1a1a}
-  /* ── Complete ── */
-  .complete-wrap{text-align:center;padding-top:.5rem}
-  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}
-  .result-card{background:#fff;border-radius:12px;padding:1rem;border:1px solid #e8e8e8;text-align:center}
-  .result-val{font-size:30px;font-weight:600}
-  .result-label{font-size:12px;color:#888;margin-top:2px}
-  /* ── Loading ── */
-  .spinner{width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#58cc02;border-radius:50%;animation:spin .7s linear infinite;margin:4rem auto}
-  @keyframes spin{to{transform:rotate(360deg)}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;min-height:100vh}
+#app{max-width:460px;margin:0 auto;padding:1.5rem 1rem 2rem;min-height:100vh}
+h1{font-size:22px;font-weight:600;color:#1a1a1a}
+
+/* ── Auth ── */
+.auth-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding-top:3rem;
+  width:100%; /* ✅ Prevents subtle overflow on mobile */
+}
+
+.auth-logo{font-size:60px;margin-bottom:1rem}
+.auth-title{font-size:24px;font-weight:700;margin-bottom:4px}
+.auth-sub{font-size:14px;color:#888;margin-bottom:2rem}
+
+.auth-tabs{display:flex;background:#ebebeb;border-radius:10px;padding:3px;margin-bottom:1.5rem;width:100%;max-width:320px}
+.auth-tab{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:#666;transition:background .15s,color .15s}
+.auth-tab.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+.auth-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+
+/* 🔥 FIXED INPUT OVERFLOW */
+.auth-input{
+  width:100%;
+  padding:13px 14px;
+  border:1.5px solid #e0e0e0;
+  border-radius:12px;
+  font-size:16px;
+  outline:none;
+  transition:border-color .15s;
+  background:#fff;
+
+  box-sizing:border-box; /* ✅ Critical fix */
+}
+
+.auth-input:focus{border-color:#58cc02}
+
+.auth-error{
+  font-size:13px;
+  color:#e24b4a;
+  text-align:center;
+  min-height:18px; /* ✅ prevents layout jump */
+}
+
+/* ── Top bar ── */
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.py-toggle{background:#fff;border:1.5px solid #e0e0e0;border-radius:20px;padding:5px 13px;font-size:13px;font-weight:500;cursor:pointer;color:#555;display:inline-flex;align-items:center;gap:5px;transition:border-color .15s,background .15s}
+.py-toggle.on{border-color:#58cc02;color:#2a6a00;background:#f0fae8}
+.py-toggle:active{transform:scale(.96)}
+.logout-btn{background:none;border:none;font-size:12px;color:#bbb;cursor:pointer;padding:4px 8px}
+.logout-btn:hover{color:#888}
+
+/* ── Stats ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.stat-card{background:#fff;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #e8e8e8}
+.stat-icon{font-size:20px;margin-bottom:2px}
+.stat-val{font-size:22px;font-weight:600;color:#1a1a1a;line-height:1.2}
+.stat-label{font-size:11px;color:#888;margin-top:2px}
+
+/* ── Progress bar ── */
+.progress-bar-track{height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;background:#58cc02;border-radius:4px;transition:width .5s}
+
+/* ── Buttons ── */
+.btn-green{width:100%;padding:16px;background:#58cc02;color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:600;cursor:pointer;transition:transform .1s,opacity .1s}
+.btn-green:active{transform:scale(.98);opacity:.92}
+.btn-green:disabled{background:#c0e8a0;cursor:default;transform:none;opacity:1}
+
+/* ── Tier sections ── */
+.tier-section{margin-top:1.5rem}
+.tier-heading{font-size:12px;font-weight:600;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.tier-badge{font-size:10px;background:#ebebeb;color:#666;border-radius:20px;padding:2px 8px;font-weight:500}
+.char-grid{display:flex;flex-wrap:wrap;gap:8px}
+.char-chip{background:#f2f2f2;border:1px solid #e0e0e0;border-radius:10px;padding:10px 14px;text-align:center;min-width:64px;cursor:pointer;user-select:none;transition:border-color .15s}
+.char-chip.mastered{background:#f0fae8;border-color:#58cc02}
+.char-zh{font-size:20px;font-weight:600;color:#1a1a1a}
+.char-py{font-size:10px;color:#58cc02;margin-top:1px;font-weight:500;transition:opacity .2s}
+.char-en{font-size:10px;color:#888;margin-top:1px}
+
+/* ── Lesson HUD ── */
+.hud{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
+.hud-bar{flex:1;height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
+.hud-bar-fill{height:100%;background:#58cc02;border-radius:4px;transition:width .3s}
+.lives{display:flex;gap:3px;font-size:15px}
+.instr{font-size:14px;color:#888;margin-bottom:1rem}
+
+/* ── Prompt box ── */
+.prompt-box{background:#fff;border-radius:16px;padding:1.75rem 1.5rem;text-align:center;margin-bottom:1.5rem;border:1px solid #e8e8e8}
+.prompt-zh{font-size:56px;font-weight:600;color:#1a1a1a;line-height:1.1;cursor:pointer;user-select:none;display:inline-block}
+.prompt-py{font-size:17px;color:#888;margin-top:8px;transition:opacity .2s}
+.prompt-en{font-size:26px;font-weight:600;color:#1a1a1a}
+.speak-btn{background:#f2f2f2;border:1.5px solid #e0e0e0;border-radius:50px;padding:8px 18px;font-size:14px;cursor:pointer;margin-top:14px;display:inline-flex;align-items:center;gap:6px;color:#444;font-weight:500;transition:background .15s}
+.speak-btn:active{background:#e4e4e4;transform:scale(.95)}
+.speak-btn.playing{background:#e8f4fd;border-color:#7ec8f5;color:#1e6fa0}
+
+/* ── Choices ── */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice{background:#fff;border:1.5px solid #d0d0d0;border-radius:12px;padding:14px 10px 10px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;user-select:none}
+.choice:active{transform:scale(.97)}
+.choice.correct{background:#edfae8;border-color:#58cc02 !important;border-width:2px}
+.choice.wrong{background:#fde8e8;border-color:#e24b4a !important;border-width:2px}
+.choice-zh{font-size:26px;font-weight:600;color:#1a1a1a;line-height:1.2}
+.choice-py{font-size:11px;color:#888;margin-top:3px;min-height:15px;transition:opacity .2s}
+.choice-en{font-size:14px;color:#1a1a1a;line-height:1.4}
+.choice-speak{position:absolute;top:5px;right:6px;font-size:12px;color:#ccc;background:none;border:none;cursor:pointer;padding:3px;line-height:1;border-radius:4px}
+.choice-speak:active{color:#58cc02}
+.q-counter{font-size:12px;color:#aaa;text-align:center;margin-top:1.25rem}
+.py-hidden{opacity:0}
+
+/* ── Tooltip ── */
+#tt{position:fixed;background:#1a1a1a;color:#fff;border-radius:10px;padding:7px 15px;font-size:15px;font-weight:500;pointer-events:none;z-index:9999;transform:translateX(-50%);display:none;white-space:nowrap}
+#tt::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:7px solid transparent;border-bottom:none;border-top-color:#1a1a1a}
+
+/* ── Complete ── */
+.complete-wrap{text-align:center;padding-top:.5rem}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}
+.result-card{background:#fff;border-radius:12px;padding:1rem;border:1px solid #e8e8e8;text-align:center}
+.result-val{font-size:30px;font-weight:600}
+.result-label{font-size:12px;color:#888;margin-top:2px}
+
+/* ── Loading ── */
+.spinner{width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#58cc02;border-radius:50%;animation:spin .7s linear infinite;margin:4rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -206,6 +247,9 @@ function renderAuth(tab) {
   <div class="auth-form">
     <input class="auth-input" id="au" type="text" placeholder="Username" autocomplete="username" autocapitalize="none">
     <input class="auth-input" id="ap" type="password" placeholder="Password" autocomplete="${tab==='login'?'current-password':'new-password'}">
+    ${tab === 'register' ? `
+    <input class="auth-input" id="ap2" type="password" placeholder="Confirm password" autocomplete="new-password">
+    ` : ''}
     <p class="auth-error" id="aerr"></p>
     <button class="btn-green" id="asbtn" onclick="submitAuth('${tab}')">
       ${tab==='login'?'Log in':'Create account'}
@@ -217,32 +261,62 @@ function renderAuth(tab) {
 }
 
 async function submitAuth(tab) {
-  const username = (document.getElementById('au').value || '').trim();
-  const password = document.getElementById('ap').value || '';
-  const errEl    = document.getElementById('aerr');
-  const btn      = document.getElementById('asbtn');
+  const username = document.getElementById('au').value.trim();
+  const password = document.getElementById('ap').value;
+  const passwordCheck = tab === 'register' ? (document.getElementById('ap2')?.value || '') : null;
+
+  const errEl = document.getElementById('aerr');
+  const btn = document.getElementById('asbtn');
+
+  // Reset UI state
   errEl.textContent = '';
-  btn.disabled = true; btn.textContent = '…';
+  btn.disabled = true;
+  btn.textContent = tab === 'login' ? 'Logging in...' : 'Creating account...';
+
+  // ✅ Basic validation
+  if (!username || !password) {
+    errEl.textContent = 'Please fill in all fields';
+    btn.disabled = false;
+    btn.textContent = tab === 'login' ? 'Log in' : 'Create account';
+    return;
+  }
+
+  // ✅ Password match check
+  if (tab === 'register' && password !== passwordCheck) {
+    errEl.textContent = 'Passwords do not match';
+    btn.disabled = false;
+    btn.textContent = 'Create account';
+    return;
+  }
+
   try {
-    const data = await api('POST', tab === 'login' ? '/api/auth/login' : '/api/auth/register', { username, password });
-    S.token    = data.token;
-    S.username = data.username;
-    localStorage.setItem('bt_token', S.token);
-    localStorage.setItem('bt_user', S.username);
-    // Load progress after login
-    const prog = await api('GET', '/api/progress', null, S.token);
-    S.progress = prog.progress;
-    S.streak   = prog.streak;
-    S.xp       = prog.xp;
-    S.screen   = 'home';
-    render();
-  } catch (e) {
-    errEl.textContent = e.message;
+    const endpoint = tab === 'login' ? '/api/login' : '/api/register';
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      errEl.textContent = data.error || 'Something went wrong';
+      btn.disabled = false;
+      btn.textContent = tab === 'login' ? 'Log in' : 'Create account';
+      return;
+    }
+
+    // ✅ Success
+    localStorage.setItem('token', data.token);
+    window.location.href = '/dashboard';
+
+  } catch (err) {
+    errEl.textContent = 'Network error. Please try again.';
     btn.disabled = false;
     btn.textContent = tab === 'login' ? 'Log in' : 'Create account';
   }
 }
-
 function logout() {
   S.token = null; S.username = null; S.progress = {}; S.streak = 0; S.xp = 0;
   localStorage.removeItem('bt_token'); localStorage.removeItem('bt_user');
