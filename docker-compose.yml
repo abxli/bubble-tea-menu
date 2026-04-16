@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bubbletea
+      POSTGRES_USER: bt_user
+      POSTGRES_PASSWORD: bt_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5555:5432"   # expose so you can connect with any DB tool (DBeaver, TablePlus, psql…)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bt_user -d bubbletea"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://bt_user:bt_pass@db:5432/bubbletea
+      JWT_SECRET: change_me_to_something_long_and_random
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

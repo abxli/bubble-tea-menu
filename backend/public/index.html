@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bubble Tea">
+<title>Bubble Tea Chinese Menu</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fa;color:#1a1a1a;min-height:100vh}
+  #app{max-width:460px;margin:0 auto;padding:1.5rem 1rem 2rem;min-height:100vh}
+  h1{font-size:22px;font-weight:600;color:#1a1a1a}
+  /* ── Auth ── */
+  .auth-wrap{display:flex;flex-direction:column;align-items:center;padding-top:3rem}
+  .auth-logo{font-size:60px;margin-bottom:1rem}
+  .auth-title{font-size:24px;font-weight:700;margin-bottom:4px}
+  .auth-sub{font-size:14px;color:#888;margin-bottom:2rem}
+  .auth-tabs{display:flex;background:#ebebeb;border-radius:10px;padding:3px;margin-bottom:1.5rem;width:100%;max-width:320px}
+  .auth-tab{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:#666;transition:background .15s,color .15s}
+  .auth-tab.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .auth-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+  .auth-input{width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:12px;font-size:16px;outline:none;transition:border-color .15s;background:#fff}
+  .auth-input:focus{border-color:#58cc02}
+  .auth-error{font-size:13px;color:#e24b4a;text-align:center;min-height:18px}
+  /* ── Top bar ── */
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .py-toggle{background:#fff;border:1.5px solid #e0e0e0;border-radius:20px;padding:5px 13px;font-size:13px;font-weight:500;cursor:pointer;color:#555;display:inline-flex;align-items:center;gap:5px;transition:border-color .15s,background .15s}
+  .py-toggle.on{border-color:#58cc02;color:#2a6a00;background:#f0fae8}
+  .py-toggle:active{transform:scale(.96)}
+  .logout-btn{background:none;border:none;font-size:12px;color:#bbb;cursor:pointer;padding:4px 8px}
+  .logout-btn:hover{color:#888}
+  /* ── Stats ── */
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+  .stat-card{background:#fff;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #e8e8e8}
+  .stat-icon{font-size:20px;margin-bottom:2px}
+  .stat-val{font-size:22px;font-weight:600;color:#1a1a1a;line-height:1.2}
+  .stat-label{font-size:11px;color:#888;margin-top:2px}
+  /* ── Progress bar ── */
+  .progress-bar-track{height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
+  .progress-bar-fill{height:100%;background:#58cc02;border-radius:4px;transition:width .5s}
+  /* ── Buttons ── */
+  .btn-green{width:100%;padding:16px;background:#58cc02;color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:600;cursor:pointer;transition:transform .1s,opacity .1s}
+  .btn-green:active{transform:scale(.98);opacity:.92}
+  .btn-green:disabled{background:#c0e8a0;cursor:default;transform:none;opacity:1}
+  /* ── Tier sections ── */
+  .tier-section{margin-top:1.5rem}
+  .tier-heading{font-size:12px;font-weight:600;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .tier-badge{font-size:10px;background:#ebebeb;color:#666;border-radius:20px;padding:2px 8px;font-weight:500}
+  .char-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .char-chip{background:#f2f2f2;border:1px solid #e0e0e0;border-radius:10px;padding:10px 14px;text-align:center;min-width:64px;cursor:pointer;user-select:none;transition:border-color .15s}
+  .char-chip.mastered{background:#f0fae8;border-color:#58cc02}
+  .char-zh{font-size:20px;font-weight:600;color:#1a1a1a}
+  .char-py{font-size:10px;color:#58cc02;margin-top:1px;font-weight:500;transition:opacity .2s}
+  .char-en{font-size:10px;color:#888;margin-top:1px}
+  /* ── Lesson HUD ── */
+  .hud{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
+  .hud-bar{flex:1;height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
+  .hud-bar-fill{height:100%;background:#58cc02;border-radius:4px;transition:width .3s}
+  .lives{display:flex;gap:3px;font-size:15px}
+  .instr{font-size:14px;color:#888;margin-bottom:1rem}
+  /* ── Prompt box ── */
+  .prompt-box{background:#fff;border-radius:16px;padding:1.75rem 1.5rem;text-align:center;margin-bottom:1.5rem;border:1px solid #e8e8e8}
+  .prompt-zh{font-size:56px;font-weight:600;color:#1a1a1a;line-height:1.1;cursor:pointer;user-select:none;display:inline-block}
+  .prompt-py{font-size:17px;color:#888;margin-top:8px;transition:opacity .2s}
+  .prompt-en{font-size:26px;font-weight:600;color:#1a1a1a}
+  .speak-btn{background:#f2f2f2;border:1.5px solid #e0e0e0;border-radius:50px;padding:8px 18px;font-size:14px;cursor:pointer;margin-top:14px;display:inline-flex;align-items:center;gap:6px;color:#444;font-weight:500;transition:background .15s}
+  .speak-btn:active{background:#e4e4e4;transform:scale(.95)}
+  .speak-btn.playing{background:#e8f4fd;border-color:#7ec8f5;color:#1e6fa0}
+  /* ── Choices ── */
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .choice{background:#fff;border:1.5px solid #d0d0d0;border-radius:12px;padding:14px 10px 10px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;user-select:none}
+  .choice:active{transform:scale(.97)}
+  .choice.correct{background:#edfae8;border-color:#58cc02 !important;border-width:2px}
+  .choice.wrong{background:#fde8e8;border-color:#e24b4a !important;border-width:2px}
+  .choice-zh{font-size:26px;font-weight:600;color:#1a1a1a;line-height:1.2}
+  .choice-py{font-size:11px;color:#888;margin-top:3px;min-height:15px;transition:opacity .2s}
+  .choice-en{font-size:14px;color:#1a1a1a;line-height:1.4}
+  .choice-speak{position:absolute;top:5px;right:6px;font-size:12px;color:#ccc;background:none;border:none;cursor:pointer;padding:3px;line-height:1;border-radius:4px}
+  .choice-speak:active{color:#58cc02}
+  .q-counter{font-size:12px;color:#aaa;text-align:center;margin-top:1.25rem}
+  .py-hidden{opacity:0}
+  /* ── Tooltip ── */
+  #tt{position:fixed;background:#1a1a1a;color:#fff;border-radius:10px;padding:7px 15px;font-size:15px;font-weight:500;pointer-events:none;z-index:9999;transform:translateX(-50%);display:none;white-space:nowrap}
+  #tt::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:7px solid transparent;border-bottom:none;border-top-color:#1a1a1a}
+  /* ── Complete ── */
+  .complete-wrap{text-align:center;padding-top:.5rem}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}
+  .result-card{background:#fff;border-radius:12px;padding:1rem;border:1px solid #e8e8e8;text-align:center}
+  .result-val{font-size:30px;font-weight:600}
+  .result-label{font-size:12px;color:#888;margin-top:2px}
+  /* ── Loading ── */
+  .spinner{width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#58cc02;border-radius:50%;animation:spin .7s linear infinite;margin:4rem auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="tt"></div>
+<div id="app"><div class="spinner"></div></div>
+<script>
+const API = '';  // same origin – backend serves this file
+
+/* ── Helpers ────────────────────────────────────────────────────────────────── */
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
+function esc(s){return String(s).replace(/'/g,"\\'")}
+
+async function api(method, path, body, token) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body)  opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+/* ── Speech ── */
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-CN'; u.rate = 0.82;
+  const btn = document.getElementById('speak-main');
+  if (btn) { btn.classList.add('playing'); u.onend = () => { const b = document.getElementById('speak-main'); if (b) b.classList.remove('playing'); }; }
+  window.speechSynthesis.speak(u);
+}
+
+/* ── Long-press tooltip ── */
+const tt = document.getElementById('tt');
+let lpTimer = null;
+function showTip(text, el) {
+  const r = el.getBoundingClientRect();
+  tt.textContent = text;
+  tt.style.left = (r.left + r.width / 2) + 'px';
+  tt.style.top  = Math.max(8, r.top - 46) + 'px';
+  tt.style.display = 'block';
+}
+function hideTip() { tt.style.display = 'none'; }
+document.addEventListener('touchstart', e => { const el = e.target.closest('[data-py]'); if (!el) return; clearTimeout(lpTimer); lpTimer = setTimeout(() => showTip(el.getAttribute('data-py'), el), 480); }, { passive: true });
+document.addEventListener('touchend',  () => { clearTimeout(lpTimer); setTimeout(hideTip, 700); }, { passive: true });
+document.addEventListener('touchmove', () => { clearTimeout(lpTimer); hideTip(); }, { passive: true });
+document.addEventListener('mousedown', e => { const el = e.target.closest('[data-py]'); if (!el) return; clearTimeout(lpTimer); lpTimer = setTimeout(() => showTip(el.getAttribute('data-py'), el), 480); });
+document.addEventListener('mouseup',   () => { clearTimeout(lpTimer); setTimeout(hideTip, 700); });
+
+/* ── App state ── */
+const app = document.getElementById('app');
+let S = {
+  screen: 'loading',
+  token: null, username: null,
+  items: [],          // from API
+  progress: {},       // item_id -> { correct, attempts }
+  streak: 0, xp: 0,
+  todayDone: false,
+  showPinyin: true,
+  // lesson state
+  questions: [], qIdx: 0, lives: 3,
+  selected: null, feedback: false,
+  lessonXp: 0, lessonUpdates: [],
+  finalStreak: 0,
+};
+
+/* ── Boot ── */
+async function init() {
+  S.token    = localStorage.getItem('bt_token');
+  S.username = localStorage.getItem('bt_user');
+  S.showPinyin = JSON.parse(localStorage.getItem('bt_pinyin') ?? 'true');
+  S.todayDone  = localStorage.getItem('bt_today') === new Date().toDateString();
+
+  try {
+    S.items = await api('GET', '/api/items');
+  } catch (e) {
+    app.innerHTML = '<p style="text-align:center;padding:3rem;color:#888">Could not reach server.<br>Is Docker running?</p>';
+    return;
+  }
+
+  if (S.token) {
+    try {
+      const data = await api('GET', '/api/progress', null, S.token);
+      S.progress = data.progress;
+      S.streak   = data.streak;
+      S.xp       = data.xp;
+      S.screen   = 'home';
+    } catch {
+      // Token expired or invalid – go to login
+      S.token = null; localStorage.removeItem('bt_token'); localStorage.removeItem('bt_user');
+      S.screen = 'auth';
+    }
+  } else {
+    S.screen = 'auth';
+  }
+  render();
+}
+
+/* ── Auth ── */
+function renderAuth(tab) {
+  tab = tab || 'login';
+  app.innerHTML = `
+<div class="auth-wrap">
+  <div class="auth-logo">🧋</div>
+  <h1 class="auth-title">Bubble Tea Chinese Menu</h1>
+  <p class="auth-sub">Read Chinese bubble tea menus like a local in 5 min a day</p>
+  <div class="auth-tabs">
+    <button class="auth-tab${tab==='login'?' active':''}" onclick="renderAuth('login')">Log in</button>
+    <button class="auth-tab${tab==='register'?' active':''}" onclick="renderAuth('register')">Sign up</button>
+  </div>
+  <div class="auth-form">
+    <input class="auth-input" id="au" type="text" placeholder="Username" autocomplete="username" autocapitalize="none">
+    <input class="auth-input" id="ap" type="password" placeholder="Password" autocomplete="${tab==='login'?'current-password':'new-password'}">
+    <p class="auth-error" id="aerr"></p>
+    <button class="btn-green" id="asbtn" onclick="submitAuth('${tab}')">
+      ${tab==='login'?'Log in':'Create account'}
+    </button>
+  </div>
+</div>`;
+  document.getElementById('au').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('ap').focus(); });
+  document.getElementById('ap').addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(tab); });
+}
+
+async function submitAuth(tab) {
+  const username = (document.getElementById('au').value || '').trim();
+  const password = document.getElementById('ap').value || '';
+  const errEl    = document.getElementById('aerr');
+  const btn      = document.getElementById('asbtn');
+  errEl.textContent = '';
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const data = await api('POST', tab === 'login' ? '/api/auth/login' : '/api/auth/register', { username, password });
+    S.token    = data.token;
+    S.username = data.username;
+    localStorage.setItem('bt_token', S.token);
+    localStorage.setItem('bt_user', S.username);
+    // Load progress after login
+    const prog = await api('GET', '/api/progress', null, S.token);
+    S.progress = prog.progress;
+    S.streak   = prog.streak;
+    S.xp       = prog.xp;
+    S.screen   = 'home';
+    render();
+  } catch (e) {
+    errEl.textContent = e.message;
+    btn.disabled = false;
+    btn.textContent = tab === 'login' ? 'Log in' : 'Create account';
+  }
+}
+
+function logout() {
+  S.token = null; S.username = null; S.progress = {}; S.streak = 0; S.xp = 0;
+  localStorage.removeItem('bt_token'); localStorage.removeItem('bt_user');
+  S.screen = 'auth'; render();
+}
+
+/* ── Pinyin toggle ── */
+function togglePinyin() {
+  S.showPinyin = !S.showPinyin;
+  localStorage.setItem('bt_pinyin', JSON.stringify(S.showPinyin));
+  render();
+}
+function pyBtn() {
+  return `<button class="py-toggle${S.showPinyin?' on':''}" onclick="togglePinyin()">
+    <span style="font-size:15px;line-height:1">拼音</span>${S.showPinyin?'Pinyin on':'Pinyin off'}
+  </button>`;
+}
+
+/* ── Lesson logic ── */
+function makeQ(item) {
+  const z2e = Math.random() > .4;
+  const others = shuffle(S.items.filter(x => x.id !== item.id)).slice(0, 3);
+  if (z2e) return { type:'z2e', prompt:item.zh, py:item.py, itemId:item.id,
+    choices: shuffle([{label:item.en,correct:true}, ...others.map(o=>({label:o.en,correct:false}))]) };
+  return { type:'e2z', prompt:item.en, itemId:item.id,
+    choices: shuffle([{label:item.zh,sub:item.py,correct:true}, ...others.map(o=>({label:o.zh,sub:o.py,correct:false}))]) };
+}
+
+function startLesson() {
+  const scored = S.items.map(item => {
+    const p = S.progress[item.id];
+    if (!p) return { item, score: item.tier * 5 };
+    return { item, score: (p.attempts > 0 ? p.correct / p.attempts : 0) * 100 + p.attempts * 2 };
+  }).sort((a,b) => a.score - b.score);
+  S.questions    = shuffle(scored.slice(0, 10).map(s => s.item)).map(makeQ);
+  S.qIdx         = 0; S.lives = 3; S.selected = null;
+  S.feedback     = false; S.lessonXp = 0; S.lessonUpdates = [];
+  S.screen       = 'lesson'; render();
+}
+
+function handleChoice(idx) {
+  if (S.feedback) return;
+  const q = S.questions[S.qIdx];
+  const c = q.choices[idx];
+  S.selected = idx; S.feedback = true;
+
+  const correct = c.correct ? 1 : 0;
+  S.lessonUpdates.push({ item_id: q.itemId, correct_delta: correct, attempts_delta: 1 });
+
+  // Optimistic local update
+  if (!S.progress[q.itemId]) S.progress[q.itemId] = { correct: 0, attempts: 0 };
+  S.progress[q.itemId].attempts++;
+  if (correct) { S.progress[q.itemId].correct++; S.lessonXp += 10; }
+  else S.lives--;
+
+  const item = S.items.find(x => x.id === q.itemId);
+  if (item) setTimeout(() => speak(item.zh), 200);
+  render();
+  setTimeout(() => {
+    if (S.lives <= 0 || S.qIdx >= S.questions.length - 1) endLesson();
+    else { S.qIdx++; S.selected = null; S.feedback = false; render(); }
+  }, 1300);
+}
+
+async function endLesson() {
+  S.todayDone = true;
+  localStorage.setItem('bt_today', new Date().toDateString());
+  S.screen = 'complete'; render();
+  // Sync to server in background
+  try {
+    const data = await api('POST', '/api/progress', {
+      updates:    S.lessonUpdates,
+      lessonXp:   S.lessonXp,
+      streakDate: new Date().toISOString(),
+    }, S.token);
+    S.progress     = data.progress;
+    S.streak       = data.streak;
+    S.xp           = data.xp;
+    S.finalStreak  = data.streak;
+    render(); // re-render complete with fresh streak
+  } catch (e) {
+    console.warn('Sync failed', e);
+  }
+}
+
+/* ── Render ── */
+function render() {
+  if      (S.screen === 'auth')     renderAuth();
+  else if (S.screen === 'home')     renderHome();
+  else if (S.screen === 'lesson')   renderLesson();
+  else if (S.screen === 'complete') renderComplete();
+}
+
+function masteredCount() {
+  return Object.values(S.progress).filter(x => x.attempts >= 3 && x.correct / x.attempts >= .8).length;
+}
+
+function renderHome() {
+  const p   = S.progress;
+  const learned  = Object.keys(p).length;
+  const mastered = masteredCount();
+  const pct = Math.round(learned / S.items.length * 100);
+  const ph  = S.showPinyin ? '' : 'py-hidden';
+
+  const byTier = { 1:[], 2:[], 3:[] };
+  S.items.forEach(item => { if (byTier[item.tier]) byTier[item.tier].push(item); });
+
+  const tierLabel = { 1:'Tier 1 — building blocks', 2:'Tier 2 — drinks & modifiers', 3:'Tier 3 — toppings' };
+
+  const tierSections = [1, 2, 3].map(t => {
+    if (!byTier[t].length) return '';
+    const chips = byTier[t].map(item => {
+      const pp  = p[item.id];
+      const ok  = pp && pp.attempts >= 3 && pp.correct / pp.attempts >= .8;
+      return `<div class="char-chip${ok?' mastered':''}" data-py="${item.py}" onclick="speak('${esc(item.zh)}')">
+        <div class="char-zh">${item.zh}</div>
+        <div class="char-py ${ph}">${item.py}</div>
+        <div class="char-en">${item.en}</div>
+      </div>`;
+    }).join('');
+    const done = byTier[t].filter(i => { const pp=p[i.id]; return pp&&pp.attempts>=3&&pp.correct/pp.attempts>=.8; }).length;
+    return `<div class="tier-section">
+      <div class="tier-heading">${tierLabel[t]}<span class="tier-badge">${done}/${byTier[t].length} mastered</span></div>
+      <div class="char-grid">${chips}</div>
+    </div>`;
+  }).join('');
+
+  app.innerHTML = `
+<div class="top-bar">
+  <span style="font-size:28px;line-height:1">🧋</span>
+  <div style="display:flex;gap:8px;align-items:center">
+    ${pyBtn()}
+    <button class="logout-btn" onclick="logout()">↩ ${esc(S.username||'')}</button>
+  </div>
+</div>
+<div style="text-align:center;margin-bottom:1.75rem">
+  <h1 style="margin-bottom:4px">Bubble tea chinese</h1>
+  <p style="font-size:14px;color:#888">5 min a day · read menus like a local</p>
+</div>
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-val">${S.streak}</div><div class="stat-label">day streak</div></div>
+  <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-val">${S.xp}</div><div class="stat-label">total xp</div></div>
+  <div class="stat-card"><div class="stat-icon">✓</div><div class="stat-val">${mastered}</div><div class="stat-label">mastered</div></div>
+</div>
+<div style="margin-bottom:1.5rem">
+  <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:5px">
+    <span>Words seen</span><span>${learned} / ${S.items.length}</span>
+  </div>
+  <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+</div>
+<button class="btn-green" onclick="startLesson()">${S.todayDone?'Practice again':"Start today's lesson"}</button>
+${S.todayDone?'<p style="text-align:center;font-size:12px;color:#58cc02;margin-top:8px">Daily lesson complete! See you tomorrow.</p>':''}
+${tierSections}
+<p style="font-size:11px;color:#bbb;margin-top:14px;text-align:center">tap to hear · long-press for pinyin</p>`;
+}
+
+function renderLesson() {
+  const q   = S.questions[S.qIdx];
+  if (!q) return;
+  const pct = Math.round(S.qIdx / S.questions.length * 100);
+  const ph  = S.showPinyin ? '' : 'py-hidden';
+  const hearts = [0,1,2].map(i=>`<span>${i<S.lives?'❤️':'🖤'}</span>`).join('');
+  const zhEsc = esc(q.prompt);
+
+  let promptHtml;
+  if (q.type === 'z2e') {
+    promptHtml = `<div class="prompt-zh" data-py="${q.py}" onclick="speak('${zhEsc}')">${q.prompt}</div>
+      <div class="prompt-py ${ph}">${q.py}</div>
+      <button class="speak-btn" id="speak-main" onclick="speak('${zhEsc}')">
+        <span style="font-size:16px">🔊</span> Play pronunciation
+      </button>`;
+  } else {
+    promptHtml = `<div class="prompt-en">${q.prompt}</div>`;
+  }
+
+  const choicesHtml = q.choices.map((c, i) => {
+    let cls = 'choice';
+    if (S.feedback) { if (c.correct) cls += ' correct'; else if (i === S.selected) cls += ' wrong'; }
+    const tc = S.feedback && c.correct ? 'color:#2a6a00' : S.feedback && i === S.selected ? 'color:#8b1f1f' : '';
+    let inner;
+    if (q.type === 'e2z') {
+      inner = `<button class="choice-speak" onclick="event.stopPropagation();speak('${esc(c.label)}')">🔊</button>
+        <div class="choice-zh" data-py="${c.sub||''}" style="${tc}">${c.label}</div>
+        <div class="choice-py ${ph}">${c.sub||''}</div>`;
+    } else {
+      inner = `<div class="choice-en" style="${tc}">${c.label}</div>`;
+    }
+    return `<button class="${cls}" onclick="handleChoice(${i})">${inner}</button>`;
+  }).join('');
+
+  app.innerHTML = `
+<div class="hud">
+  <div class="hud-bar"><div class="hud-bar-fill" style="width:${pct}%"></div></div>
+  <div class="lives">${hearts}</div>
+  ${pyBtn()}
+</div>
+<p class="instr">${q.type==='z2e'?'What does this mean in English?':'Which Chinese character?'}</p>
+<div class="prompt-box">${promptHtml}</div>
+<div class="choices">${choicesHtml}</div>
+<div class="q-counter">${S.qIdx+1} / ${S.questions.length}</div>`;
+}
+
+function renderComplete() {
+  app.innerHTML = `
+<div class="top-bar" style="justify-content:flex-end">${pyBtn()}</div>
+<div class="complete-wrap">
+  <div style="font-size:68px;margin-bottom:1rem">🎉</div>
+  <h2 style="font-size:24px;font-weight:600;margin-bottom:8px">Lesson complete!</h2>
+  <p style="font-size:15px;color:#888;margin-bottom:2rem">Great work — your reading is improving.</p>
+  <div class="result-grid">
+    <div class="result-card"><div class="result-val" style="color:#58cc02">+${S.lessonXp}</div><div class="result-label">XP earned</div></div>
+    <div class="result-card"><div class="result-val" style="color:#ff9600">🔥 ${S.finalStreak||S.streak}</div><div class="result-label">day streak</div></div>
+  </div>
+  <button class="btn-green" onclick="S.screen='home';render()">Back to home</button>
+</div>`;
+}
+
+init();
+</script>
+</body>
+</html>
